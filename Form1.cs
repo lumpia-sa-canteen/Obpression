@@ -178,7 +178,7 @@ namespace Obpression
 
         private void AboutUsButton_Click(object sender, EventArgs e)
         {
-            AboutUsForm aboutUsForm = new AboutUsForm();
+            AboutUsForm aboutUsForm = new AboutUsForm(this);
             aboutUsForm.FormClosed += (s, args) =>
             {
                 this.Show();
