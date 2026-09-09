@@ -7,8 +7,11 @@ namespace Obpression
 {
     public class AboutUsForm : Form
     {
-        public AboutUsForm()
+        private Form previousForm;
+        public AboutUsForm(Form previousForm)
         {
+            this.previousForm = previousForm;
+
             // ==========================================
             // Window settings
             // ==========================================
@@ -110,14 +113,9 @@ namespace Obpression
                     FontStyle.Bold
                 );
 
-            title.AutoSize =
-                true;
-
-            title.Location =
-                new Point(
-                    90,
-                    30
-                );
+            title.Size = new Size(aboutPanel.Width, 50);
+            title.Location = new Point(0, 20);
+            title.TextAlign = ContentAlignment.MiddleCenter;
 
 
             // ==========================================
@@ -174,6 +172,17 @@ namespace Obpression
             menuPanel.BringToFront();
 
             aboutPanel.BringToFront();
+
+            //back button
+
+            BackButton backbutton = new BackButton(this, previousForm);
+            backbutton.Location = new Point(
+                (menuPanel.Width - backbutton.Width) / 2,
+                menuPanel.Height - 55);
+
+            menuPanel.Controls.Add(backbutton);
+
+
         }
 
 
