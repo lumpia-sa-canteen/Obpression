@@ -16,12 +16,14 @@ namespace Obpression
             // Window settings
             // ==========================================
 
-            Text = "About Us";
+            Text = "Obpression";
 
             ClientSize = new Size(400, 700);
 
             MinimumSize = new Size(400, 700);
             MaximumSize = new Size(400, 700);
+
+            StartPosition = FormStartPosition.CenterScreen;
 
             MaximizeBox = false;
             MinimizeBox = true;
