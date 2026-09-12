@@ -68,6 +68,43 @@ namespace Obpression
             oldPanel.BackColor = Color.Transparent;
 
             //=======================
+            // old
+            //=======================
+
+            Label title = new Label();
+            title.Text = "OLD";
+            title.ForeColor = Color.White;
+            title.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
+            title.Size = new Size(oldPanel.Width, 50);
+            title.Location = new Point(0, 20);
+            title.TextAlign = ContentAlignment.MiddleCenter;
+
+            //=======================
+            // description
+            //=======================
+
+            Label desc = new Label();
+            desc.Text =
+                "Obsessive Love Disorder (OLD) refers to an intense preoccupation " +
+                "with another person that can become difficult to control. " +
+                "It may involve persistent thoughts, a strong need for reassurance, " +
+                "and difficulty managing emotions when separated from the person. " +
+                "Understanding these patterns can help encourage healthier relationships " +
+                "and emotional well-being.";
+
+            desc.ForeColor = Color.White;
+            desc.Font = new Font("Segoe UI", 8F, FontStyle.Regular);
+            desc.AutoSize = false;
+            desc.Size = new Size(260, 200);
+            desc.TextAlign =ContentAlignment.MiddleCenter;
+            desc.Location = new Point(20, 90);
+
+            oldPanel.Controls.Add(title);
+            oldPanel.Controls.Add(desc);
+
+            menuPanel.Controls.Add(oldPanel);
+
+            //=======================
             // order
             //=======================
 

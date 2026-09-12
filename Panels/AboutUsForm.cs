@@ -128,10 +128,13 @@ namespace Obpression
                 new Label();
 
             description.Text =
-                "Obpression is a student-focused\n" +
-                "application designed to help users\n" +
-                "understand their academic status\n" +
-                "and provide useful guidance.";
+
+                "Obpression is an AI assistant designed to help individuals " +
+                "better understand and navigate the challenges of relationships, " +
+                "Obessive Love Disorder, and emotional well-being. " +
+                "Our goal is to encourage healthier relationships, " +
+                "self-awareness, and a better understanding of the emotions " +
+                "that shape our connections with others.";
 
             description.ForeColor =
                 Color.White;
@@ -139,7 +142,7 @@ namespace Obpression
             description.Font =
                 new Font(
                     "Segoe UI",
-                    11F,
+                    8F,
                     FontStyle.Regular
                 );
 
@@ -147,7 +150,7 @@ namespace Obpression
                 false;
 
             description.Size =
-                new Size(260, 150);
+                new Size(260, 200);
 
             description.TextAlign =
                 ContentAlignment.MiddleCenter;
@@ -155,7 +158,7 @@ namespace Obpression
             description.Location =
                 new Point(
                     20,
-                    100
+                    90
                 );
 
 

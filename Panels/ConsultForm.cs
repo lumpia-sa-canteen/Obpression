@@ -20,9 +20,9 @@ namespace Obpression
             //==============================
 
             Text = "Obpression";
-            ClientSize = new Size(400, 700);
-            MinimumSize = new Size(400, 700);
-            MaximumSize = new Size(400, 700);
+            ClientSize = new Size(1280, 720);
+            MinimumSize = new Size(1280, 720);
+            MaximumSize = new Size(1280, 720);
             MaximizeBox = false;
             MinimizeBox = true;
             FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -49,7 +49,7 @@ namespace Obpression
             //==============================
 
             MenuPanel menu = new MenuPanel();
-            menu.Size = new Size(340, 500);
+            menu.Size = new Size(1100, 600);
             menu.Location = new Point(
                 (ClientSize.Width - menu.Width) / 2,
                 (ClientSize.Height - menu.Height) / 2
