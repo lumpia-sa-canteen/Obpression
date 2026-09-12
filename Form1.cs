@@ -24,6 +24,8 @@ namespace Obpression
             MinimumSize = new Size(400, 700);
             MaximumSize = new Size(400, 700);
 
+            StartPosition = FormStartPosition.CenterScreen;
+
             MaximizeBox = false;
             MinimizeBox = true;
 
@@ -103,6 +105,8 @@ namespace Obpression
             oldBtn.Size = new Size(110, 40);
             oldBtn.Location = new Point(15, 85);
 
+            oldBtn.Click += OldBtn_Click;
+
             panel1.Controls.Add(aboutUsButton);
             panel1.Controls.Add(oldBtn);
 
@@ -132,12 +136,17 @@ namespace Obpression
             relBtn.Size = new Size(110, 40);
             relBtn.Location = new Point(15, 15);
 
+            relBtn.Click += RelationshipGoals_Click;
+
             ConsultWithAi consBtn = new ConsultWithAi();
             consBtn.Size = new Size(110, 40);
             consBtn.Location = new Point(15, 85);
 
+            consBtn.Click += ConsultWithAi_Click;
+
             panel2.Controls.Add(consBtn);
             panel2.Controls.Add(relBtn);
+
             menuPanel.Controls.Add(panel2);
 
 
@@ -176,6 +185,7 @@ namespace Obpression
             panel3.BringToFront();
         }
 
+        //action listener
         private void AboutUsButton_Click(object sender, EventArgs e)
         {
             AboutUsForm aboutUsForm = new AboutUsForm(this);
@@ -186,6 +196,49 @@ namespace Obpression
 
             this.Hide();
             aboutUsForm.Show(); 
+        }
+
+        // action listener
+
+        private void OldBtn_Click(object sender, EventArgs e)
+        {
+            OldForm oldForm = new OldForm(this);
+            oldForm.FormClosed += (s, args) =>
+            {
+                this.Show();
+            };
+
+
+            this.Hide();
+            oldForm.Show();
+        }
+
+        // action listener
+
+        private void RelationshipGoals_Click(object sender, EventArgs e)
+        {
+            StatusForm statusForm = new StatusForm(this);
+            statusForm.FormClosed += (s, args) =>
+            {
+                this.Show();
+            };
+
+            this.Hide();
+            statusForm.Show();
+        }
+
+        // action listener
+
+        private void ConsultWithAi_Click(object sender, EventArgs e)
+        {
+            ConsultForm consForm = new ConsultForm(this);
+            consForm.FormClosed += (s, args) =>
+            {
+                this.Show();
+            };
+
+            this.Hide();
+            consForm.Show();
         }
 
 
