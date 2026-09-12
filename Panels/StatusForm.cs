@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using Obpression.Buttons;
+using System.Xml.Serialization;
 
 
 namespace Obpression
@@ -89,6 +90,12 @@ namespace Obpression
             ExtremeButton extremeBtn = new ExtremeButton();
             extremeBtn.Location = new Point(230, 45);
 
+            // action listeners
+
+            normalBtn.Click += NormalButton_Click;
+            moderateBtn.Click += ModerateButton_Click;
+            extremeBtn.Click += ExtremeButton_Click;
+
 
             //==========================================
             // add buttton controls
@@ -119,6 +126,45 @@ namespace Obpression
             menu.Controls.Add(backBtn);
 
 
+        }
+
+        // action listeners
+
+        private void NormalButton_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(
+                "Thinking about someone often, enjoying their attention, " +
+                "and wanting to spend time together can be normal.",
+                "Normal Behaviors",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information 
+                );
+        }
+
+        private void ModerateButton_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(
+                "Frequently checking messages or social media, " +
+                "may show some signs of jealousy and seeking reassurance " +
+                "may indicate increasing preoccupation.",
+                "Moderate Behaviors",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning
+                );
+        }
+
+        private void ExtremeButton_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(
+                "Constantly thinking about the person on interest, " +
+                "extreme cases of jealousy towards families or friends, " +
+                "repeatedly contacting them despite their boundaries, " +
+                "and is very wary of your actions towards other people " +
+                "leading to controlling.",
+                "Extreme Behaviors",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning
+                );
         }
 
         //==========================================
