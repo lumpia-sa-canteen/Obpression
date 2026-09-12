@@ -4,6 +4,7 @@ using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
+using Obpression.Buttons;
 
 
 namespace Obpression
@@ -50,7 +51,7 @@ namespace Obpression
             //==========================================
 
             MenuPanel menu = new MenuPanel();
-            menu.Size = new Size(340, 150);
+            menu.Size = new Size(340, 200);
             menu.Location = new Point(
                 (ClientSize.Width - menu.Width) / 2,
                 (ClientSize.Height - menu.Height) / 2
@@ -67,6 +68,35 @@ namespace Obpression
             panel.Location = new Point(20, 50);
             panel.BackColor = Color.Transparent;
 
+            //==========================================
+            // normal btn
+            //==========================================
+
+            NormalButton normalBtn = new NormalButton();
+            normalBtn.Location = new Point(10, 45);
+
+            //==========================================
+            // moderate btn
+            //==========================================
+
+            ModerateButton moderateBtn = new ModerateButton();
+            moderateBtn.Location = new Point(120, 45);
+
+            //==========================================
+            //extreme btn
+            //==========================================
+
+            ExtremeButton extremeBtn = new ExtremeButton();
+            extremeBtn.Location = new Point(230, 45);
+
+
+            //==========================================
+            // add buttton controls
+            //==========================================
+
+            menu.Controls.Add(normalBtn);
+            menu.Controls.Add(moderateBtn);
+            menu.Controls.Add(extremeBtn);
 
             //==========================================
             // order
