@@ -11,8 +11,6 @@ namespace Obpression
         {
             InitializeComponent();
 
-            
-
             // ==========================================
             // Window settings
             // ==========================================
@@ -173,6 +171,69 @@ namespace Obpression
 
 
             // ==========================================
+            // Dropdowns (live on menuPanel,
+            // stacked at the top of panel3)
+            // ==========================================
+
+            int pad = 15;
+            int gap = 10;
+            int boxWidth = panel3.Width - pad * 2;
+            int boxX = panel3.Left + pad;
+            int boxY = panel3.Top + pad;
+
+            // Status: 1 - 3
+            ComboBox statusBox = CreateDropdown(
+                "Enter your status here",
+                new string[] { "1", "2", "3" },
+                boxX, boxY, boxWidth);
+
+            // BDI: 1 - 3
+            boxY += statusBox.Height + gap;
+            ComboBox bdiBox = CreateDropdown(
+                "BDI",
+                new string[] { "1", "2", "3" },
+                boxX, boxY, boxWidth);
+
+            // Sleep hours: 0 - 24
+            boxY += bdiBox.Height + gap;
+            string[] hours = new string[25];
+            for (int i = 0; i <= 24; i++)
+                hours[i] = i.ToString();
+
+            ComboBox sleepBox = CreateDropdown(
+                "Sleep hours (0 - 24)",
+                hours,
+                boxX, boxY, boxWidth);
+
+            // SelectedIndex: 0 = nothing chosen
+            // status -> 1..3, bdi -> 1..3, sleep -> (index - 1) hours
+            statusBox.SelectedIndexChanged += (s, e) =>
+            {
+                int status = statusBox.SelectedIndex;
+                // do something with it
+            };
+
+            bdiBox.SelectedIndexChanged += (s, e) =>
+            {
+                int bdi = bdiBox.SelectedIndex;
+                // do something with it
+            };
+
+            sleepBox.SelectedIndexChanged += (s, e) =>
+            {
+                if (sleepBox.SelectedIndex > 0)
+                {
+                    int sleepHours = sleepBox.SelectedIndex - 1;   // 0 - 24
+                    // do something with it
+                }
+            };
+
+            menuPanel.Controls.Add(statusBox);
+            menuPanel.Controls.Add(bdiBox);
+            menuPanel.Controls.Add(sleepBox);
+
+
+            // ==========================================
             // Z-Order
             // ==========================================
 
@@ -183,6 +244,42 @@ namespace Obpression
             panel1.BringToFront();
             panel2.BringToFront();
             panel3.BringToFront();
+
+            // must be last so they draw on top of panel3
+            statusBox.BringToFront();
+            bdiBox.BringToFront();
+            sleepBox.BringToFront();
+        }
+
+        // ==========================================
+        // Helper: builds a styled dropdown whose first
+        // item is the placeholder text
+        // ==========================================
+
+        private ComboBox CreateDropdown(
+            string placeholder,
+            string[] items,
+            int x,
+            int y,
+            int width)
+        {
+            ComboBox box = new ComboBox();
+
+            box.DropDownStyle = ComboBoxStyle.DropDownList;
+            box.FlatStyle = FlatStyle.Flat;
+            box.BackColor = Color.FromArgb(30, 30, 30);
+            box.ForeColor = Color.White;
+            box.Font = new Font("Segoe UI", 10f);
+            box.MaxDropDownItems = 8;
+
+            box.Items.Add(placeholder);
+            box.Items.AddRange(items);
+            box.SelectedIndex = 0;
+
+            box.Width = width;
+            box.Location = new Point(x, y);
+
+            return box;
         }
 
         //action listener
@@ -195,7 +292,7 @@ namespace Obpression
             };
 
             this.Hide();
-            aboutUsForm.Show(); 
+            aboutUsForm.Show();
         }
 
         // action listener
