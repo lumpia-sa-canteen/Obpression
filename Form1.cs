@@ -2,6 +2,9 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using System.Globalization;
+using System.IO;
+using System.Text;
 
 namespace Obpression
 {
@@ -205,6 +208,11 @@ namespace Obpression
                 hours,
                 boxX, boxY, boxWidth);
 
+            // screen time
+
+            boxY += sleepBox.Height + gap;
+            ComboBox screenBox = CreateDropdown("Screen time hours (0- 24)", hours, boxX, boxY, boxWidth);
+
             // SelectedIndex: 0 = nothing chosen
             // status -> 1..3, bdi -> 1..3, sleep -> (index - 1) hours
             statusBox.SelectedIndexChanged += (s, e) =>
@@ -228,9 +236,76 @@ namespace Obpression
                 }
             };
 
+            screenBox.SelectedIndexChanged += (s, e) =>
+            {
+                if (screenBox.SelectedIndex > 0)
+                {
+                    int screenTime = screenBox.SelectedIndex - 1; // 0 - 24
+                    // do something with it
+                }
+            };
+
             menuPanel.Controls.Add(statusBox);
             menuPanel.Controls.Add(bdiBox);
             menuPanel.Controls.Add(sleepBox);
+            menuPanel.Controls.Add(screenBox);
+
+            // ok button
+
+            Button ok = new Button();
+
+            ok.Text = "OK";
+            ok.FlatStyle = FlatStyle.Flat;
+            ok.FlatAppearance.BorderColor = Color.White;
+            ok.FlatAppearance.BorderSize = 1;
+            ok.BackColor = Color.Transparent;
+            ok.ForeColor = Color.White;
+            ok.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
+            ok.Cursor = Cursors.Hand;
+            ok.FlatAppearance.MouseOverBackColor = Color.Gray;
+            ok.FlatAppearance.MouseDownBackColor = Color.DarkGray;
+
+            ok.Size = new Size(boxWidth, 36);
+            ok.Location = new Point(panel3.Left + pad, panel3.Bottom - ok.Height - pad);
+
+            ok.Click += (s, e) =>
+            {
+                if (statusBox.SelectedIndex <= 0 ||
+                bdiBox.SelectedIndex <= 0 ||
+                sleepBox.SelectedIndex <= 0 ||
+                screenBox.SelectedIndex <= 0)
+                {
+                    MessageBox.Show(
+                        "Please Choose a value for status, BDI, sleep hours and screen time.",
+                        "Obpression",
+                         MessageBoxButtons.OK,
+                         MessageBoxIcon.Warning);
+                    return;
+                }
+
+                int status = statusBox.SelectedIndex; // 1- 3
+                int bdi = bdiBox.SelectedIndex; // 1 - 3
+                int sleepHours = sleepBox.SelectedIndex - 1; // 0 - 24
+                int screenTime = screenBox.SelectedIndex - 1; // 0 - 24
+
+                if (SaveToCsv(status, bdi, sleepHours, screenTime))
+                {
+                    MessageBox.Show(
+                        "Saved!",
+                        "Obpression",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+
+                    // reset the dropdowms for the next entry
+
+                    statusBox.SelectedIndex = 0;
+                    bdiBox.SelectedIndex = 0;
+                    sleepBox.SelectedIndex = 0;
+                    screenBox.SelectedIndex = 0;
+                }
+            };
+
+            menuPanel.Controls.Add(ok);
 
 
             // ==========================================
@@ -249,6 +324,61 @@ namespace Obpression
             statusBox.BringToFront();
             bdiBox.BringToFront();
             sleepBox.BringToFront();
+            screenBox.BringToFront();
+            ok.BringToFront();
+        }
+
+        // save to csv file
+
+        private bool SaveToCsv(int status, int bdi, int sleepHours, int screenTime)
+        {
+            string path = Path.Combine(Application.StartupPath, "obpression_data.csv");
+
+            try
+            {
+                if (!File.Exists(path))
+                {
+                    File.WriteAllText(
+                        path, "timestamp, status, bdi, sleep_hours, screen_time" + Environment.NewLine,
+                        Encoding.UTF8);
+                }
+                string line = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "{0}, {1}, {2}, {3}, {4}",
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
+                    status,
+                    bdi,
+                    sleepHours,
+                    screenTime);
+
+                File.AppendAllText(
+                    path, line + Environment.NewLine,
+                    Encoding.UTF8);
+
+                return true;
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show(
+                    "Could not write to the file. Is it open in Excel?\n\n" + ex.Message,
+                    "Obpressiom",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                return false;
+
+            }
+
+            catch (UnauthorizedAccessException ex)
+            {
+                MessageBox.Show(
+                    "No permission to write to:\n" + path + "\n\n" + ex.Message,
+                    "Obpression",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                return false;
+            }
         }
 
         // ==========================================
