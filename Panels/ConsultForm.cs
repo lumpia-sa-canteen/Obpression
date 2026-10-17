@@ -27,16 +27,19 @@ namespace Obpression
         private DateTimePicker datePicker;
         private Button adviseBtn;
         private ComboBox entryBox;
+        private Button newSessionBtn;
+        private string currentSessionKey;   // which check-in the current chat belongs to
 
         // AI state
         private readonly List<ChatTurn> history = new List<ChatTurn>();
         private List<CheckIn> checkIns = new List<CheckIn>();      // earlier entries (for comparison)
         private List<CheckIn> focusEntries = new List<CheckIn>();  // entries on the picked date
 
-        private class ChatTurn
+        public class ChatTurn
         {
-            public string Role;     // "user" or "assistant"
-            public string Content;
+            public string Role { get; set; }      // "user" or "assistant"
+            public string Content { get; set; }
+            public bool Hidden { get; set; }      // hidden = sent to the AI but not shown in the chat
         }
 
         private class CheckIn
@@ -56,8 +59,6 @@ namespace Obpression
             //==============================
             // window settings
             //==============================
-
-            // icon
 
             this.Icon = new Icon(new MemoryStream(Properties.Resources.SoraVN));
 
@@ -166,7 +167,7 @@ namespace Obpression
             adviseBtn.FlatStyle = FlatStyle.Flat;
             adviseBtn.BackColor = Color.FromArgb(60, 60, 60);
             adviseBtn.ForeColor = Color.White;
-            adviseBtn.Click += (s, e) => AdviseForDate();
+            adviseBtn.Click += (s, e) => AdviseForDate(false);
 
             // if several check-ins were saved on the same date, choose which one (default = newest)
             entryBox = new ComboBox();
@@ -180,6 +181,26 @@ namespace Obpression
 
             datePicker.ValueChanged += (s, e) => RefreshEntryList();
 
+            newSessionBtn = new Button();
+            newSessionBtn.Text = "Start new advice";
+            newSessionBtn.Location = new Point(880, 545);
+            newSessionBtn.Size = new Size(190, 36);
+            newSessionBtn.FlatStyle = FlatStyle.Flat;
+            newSessionBtn.BackColor = Color.FromArgb(60, 60, 60);
+            newSessionBtn.ForeColor = Color.White;
+            newSessionBtn.Click += (s, e) =>
+            {
+                if (MessageBox.Show(
+                        "Start new advice for this check-in? The saved conversation for it will be replaced.",
+                        "Obpression",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    AdviseForDate(true);
+                }
+            };
+
+            menu.Controls.Add(newSessionBtn);
             menu.Controls.Add(entryBox);
             menu.Controls.Add(datePicker);
             menu.Controls.Add(adviseBtn);
@@ -320,7 +341,87 @@ namespace Obpression
             entryBox.Enabled = true;
         }
 
-        private async void AdviseForDate()
+        //==============================
+        // saved chat sessions (one per check-in)
+        // C:\Users\<name>\AppData\Local\Obpression\chat_sessions.json
+        //==============================
+
+        private static string SessionsFile()
+        {
+            string folder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Obpression");
+            Directory.CreateDirectory(folder);
+            return Path.Combine(folder, "chat_sessions.json");
+        }
+
+        private Dictionary<string, List<ChatTurn>> ReadAllSessions()
+        {
+            try
+            {
+                string file = SessionsFile();
+                if (File.Exists(file))
+                {
+                    var data = JsonSerializer.Deserialize<Dictionary<string, List<ChatTurn>>>(
+                        File.ReadAllText(file, Encoding.UTF8));
+                    if (data != null) return data;
+                }
+            }
+            catch (Exception)
+            {
+                // unreadable file - start with an empty list
+            }
+
+            return new Dictionary<string, List<ChatTurn>>();
+        }
+
+        private void WriteAllSessions(Dictionary<string, List<ChatTurn>> sessions)
+        {
+            try
+            {
+                File.WriteAllText(
+                    SessionsFile(),
+                    JsonSerializer.Serialize(sessions, new JsonSerializerOptions { WriteIndented = true }),
+                    Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                AppendNote("Could not save the conversation: " + ex.Message);
+            }
+        }
+
+        private void SaveCurrentSession()
+        {
+            if (currentSessionKey == null) return;
+
+            Dictionary<string, List<ChatTurn>> sessions = ReadAllSessions();
+            sessions[currentSessionKey] = history
+                .Select(h => new ChatTurn { Role = h.Role, Content = h.Content, Hidden = h.Hidden })
+                .ToList();
+            WriteAllSessions(sessions);
+        }
+
+        private void StartSessionView(string title)
+        {
+            chatLog.Clear();
+            AppendNote("This is supportive guidance only. It is not a diagnosis or medical advice.");
+            AppendNote(title);
+        }
+
+        private void ShowTranscript()
+        {
+            foreach (ChatTurn t in history)
+            {
+                if (t.Hidden) continue;
+
+                if (t.Role == "user")
+                    AppendMessage("You", t.Content, Color.LightSkyBlue);
+                else
+                    AppendMessage("AI", t.Content, Color.LightGreen);
+            }
+        }
+
+        private async void AdviseForDate(bool forceNew)
         {
             DateTime day = datePicker.Value.Date;
             string dayText = day.ToString("MMMM d, yyyy", CultureInfo.InvariantCulture);
@@ -350,9 +451,29 @@ namespace Obpression
             List<CheckIn> earlier = all.Where(c => c.When < chosen.When).ToList();
             checkIns = earlier.Skip(Math.Max(0, earlier.Count - 4)).ToList();
 
-            history.Clear(); // new advice = fresh conversation
-            AppendNote("Advice for " + dayText + " at " +
-                       chosen.When.ToString("HH:mm", CultureInfo.InvariantCulture));
+            currentSessionKey = chosen.Time;
+            string title = dayText + " at " +
+                           chosen.When.ToString("HH:mm", CultureInfo.InvariantCulture);
+
+            Dictionary<string, List<ChatTurn>> sessions = ReadAllSessions();
+
+            // a conversation already exists for this check-in -> restore it
+            if (!forceNew && sessions.ContainsKey(chosen.Time) && sessions[chosen.Time].Count > 0)
+            {
+                history.Clear();
+                history.AddRange(sessions[chosen.Time]);
+
+                StartSessionView("Saved conversation for " + title);
+                ShowTranscript();
+                return;
+            }
+
+            // new advice (or "Start new advice"): drop the old saved chat for this check-in
+            if (forceNew && sessions.Remove(chosen.Time))
+                WriteAllSessions(sessions);
+
+            history.Clear();
+            StartSessionView("Advice for " + title);
 
             await AskAi("Please look at my check-in for " + dayText +
                         " and advise me about my relationship.", false);
@@ -436,7 +557,7 @@ namespace Obpression
             if (showUserText)
                 AppendMessage("You", userText, Color.LightSkyBlue);
 
-            history.Add(new ChatTurn { Role = "user", Content = userText });
+            history.Add(new ChatTurn { Role = "user", Content = userText, Hidden = !showUserText });
 
             SetBusy(true);
 
@@ -445,6 +566,7 @@ namespace Obpression
                 string reply = await GetAiReply();
                 history.Add(new ChatTurn { Role = "assistant", Content = reply });
                 AppendMessage("SORA", reply, Color.LightGreen);
+                SaveCurrentSession();   // keep the whole conversation for this check-in
             }
             catch (Exception ex)
             {
@@ -461,6 +583,7 @@ namespace Obpression
         {
             sendBtn.Enabled = !busy;
             adviseBtn.Enabled = !busy;
+            newSessionBtn.Enabled = !busy;
             datePicker.Enabled = !busy;
             entryBox.Enabled = !busy && entryBox.Items.Count > 0 && entryBox.Tag == null;
             partnerBtn.Enabled = !busy;
@@ -502,7 +625,11 @@ namespace Obpression
             sb.Append(EndToken);
 
             // keep only the latest turns so the prompt always fits the context size
-            foreach (ChatTurn h in history.Skip(Math.Max(0, history.Count - 6)))
+            List<ChatTurn> recent = history.Skip(Math.Max(0, history.Count - 6)).ToList();
+            while (recent.Count > 0 && recent[0].Role == "assistant")
+                recent.RemoveAt(0);
+
+            foreach (ChatTurn h in recent)
             {
                 sb.Append("<|start_header_id|>" + h.Role + "<|end_header_id|>\n\n");
                 sb.Append(h.Content);
