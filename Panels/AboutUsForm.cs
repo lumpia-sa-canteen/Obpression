@@ -16,6 +16,10 @@ namespace Obpression
             // Window settings
             // ==========================================
 
+            // icon
+
+            this.Icon = new Icon(new MemoryStream(Properties.Resources.SoraVN));
+
             Text = "Obpression";
 
             ClientSize = new Size(400, 700);

@@ -31,6 +31,10 @@ namespace Obpression
             FormBorderStyle = FormBorderStyle.FixedSingle;
             StartPosition = FormStartPosition.CenterScreen;
 
+            //icom
+
+            this.Icon = new Icon(new MemoryStream(Properties.Resources.SoraVN));
+
             //==========================================
             // background image
             //==========================================

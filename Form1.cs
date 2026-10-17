@@ -18,6 +18,10 @@ namespace Obpression
             // Window settings
             // ==========================================
 
+            // iocn
+
+            this.Icon = new Icon(new MemoryStream(Properties.Resources.SoraVN));
+
             Text = "Obpression";
 
             ClientSize = new Size(400, 700);
@@ -328,20 +332,32 @@ namespace Obpression
             ok.BringToFront();
         }
 
+        // ==========================================
         // save to csv file
+        // Saved in the user's AppData folder so it works on any
+        // computer. ConsultForm reads the same file:
+        // C:\Users\<name>\AppData\Local\Obpression\obpression_data.csv
+        // ==========================================
 
         private bool SaveToCsv(int status, int bdi, int sleepHours, int screenTime)
         {
-            string path = Path.Combine(Application.StartupPath, "obpression_data.csv");
+            string folder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Obpression");
+
+            string path = Path.Combine(folder, "obpression_data.csv");
 
             try
             {
+                Directory.CreateDirectory(folder);
+
                 if (!File.Exists(path))
                 {
                     File.WriteAllText(
                         path, "timestamp, status, bdi, sleep_hours, screen_time" + Environment.NewLine,
                         Encoding.UTF8);
                 }
+
                 string line = string.Format(
                     CultureInfo.InvariantCulture,
                     "{0}, {1}, {2}, {3}, {4}",
@@ -361,14 +377,12 @@ namespace Obpression
             {
                 MessageBox.Show(
                     "Could not write to the file. Is it open in Excel?\n\n" + ex.Message,
-                    "Obpressiom",
+                    "Obpression",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
 
                 return false;
-
             }
-
             catch (UnauthorizedAccessException ex)
             {
                 MessageBox.Show(
