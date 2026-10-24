@@ -417,7 +417,7 @@ namespace Obpression
                 if (t.Role == "user")
                     AppendMessage("You", t.Content, Color.LightSkyBlue);
                 else
-                    AppendMessage("AI", t.Content, Color.LightGreen);
+                    AppendMessage("SORA", t.Content, Color.LightGreen);
             }
         }
 
